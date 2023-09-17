@@ -1,0 +1,7 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/halloween/misc/resupply_locker/locker"
+	"$surfaceprop" "Wood_Plank"
+	"$surfaceprop2" "MetalPanel"
+	"$alphatest" 1
+}

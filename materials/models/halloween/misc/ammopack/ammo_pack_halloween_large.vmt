@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/halloween/misc/ammopack/ammo_pack_halloween_large"
+	"$selfillum" "1"
+}
