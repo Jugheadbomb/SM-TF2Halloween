@@ -272,6 +272,8 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 void Event_PlayerState(Event event, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("userid"));
+	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient))
+		return;
 
 	if (strcmp(sName[7], "spawn") == 0)
 	{
@@ -285,6 +287,8 @@ void Event_PlayerState(Event event, const char[] sName, bool bDontBroadcast)
 void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("userid"));
+	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient))
+		return;
 
 	SetVariantString("randomnum:100");
 	AcceptEntityInput(iClient, "AddContext");
@@ -343,6 +347,8 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 void Event_ItemPickup(Event event, const char[] sName, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(event.GetInt("userid"));
+	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient))
+		return;
 
 	if (sm_halloween_pickup_sounds.BoolValue)
 		EmitSoundToClient(iClient, g_sPickupSound[GetURandomInt() % sizeof(g_sPickupSound)], .volume = 0.6);
