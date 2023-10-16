@@ -6,7 +6,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "1.0.1"
+#define PLUGIN_VERSION "1.0.2"
 
 #define EF_NODRAW (1 << 5)
 #define TF_VISION_FILTER_HALLOWEEN (1 << 1)
@@ -362,6 +362,55 @@ Action Event_BroadcastAudio(Event event, const char[] sName, bool bDontBroadcast
 		"Halloween.hellride"
 	};
 
+	static const char sRedWinSound[][] =
+	{
+		"Announcer.Helltower_Red_Win01",
+		"Announcer.Helltower_Red_Win02",
+		"Announcer.Helltower_Red_Win03",
+		"Announcer.Helltower_Red_Win04",
+		"Announcer.Helltower_Red_Win05",
+		"Announcer.Helltower_Red_Win06",
+		"Announcer.Helltower_Red_Win07",
+		"Announcer.Helltower_Red_Win_Rare01"
+	};
+
+	static const char sRedLoseSound[][] =
+	{
+		"Announcer.Helltower_Red_Lose01",
+		"Announcer.Helltower_Red_Lose02",
+		"Announcer.Helltower_Red_Lose03",
+		"Announcer.Helltower_Red_Lose04",
+		"Announcer.Helltower_Red_Lose05",
+		"Announcer.Helltower_Red_Lose06",
+		"Announcer.Helltower_Red_Lose07",
+	};
+
+	static const char sBlueWinSound[][] =
+	{
+		"Announcer.Helltower_Blue_Win01",
+		"Announcer.Helltower_Blue_Win02",
+		"Announcer.Helltower_Blue_Win03",
+		"Announcer.Helltower_Blue_Win04",
+		"Announcer.Helltower_Blue_Win05",
+		"Announcer.Helltower_Blue_Win06",
+		"Announcer.Helltower_Blue_Win07",
+		"Announcer.Helltower_Blue_Win_Rare01",
+		"Announcer.Helltower_Blue_Win_Rare02",
+		"Announcer.Helltower_Blue_Win_Rare03"
+	};
+
+	static const char sBlueLoseSound[][] =
+	{
+		"Announcer.Helltower_Blue_Lose01",
+		"Announcer.Helltower_Blue_Lose02",
+		"Announcer.Helltower_Blue_Lose03",
+		"Announcer.Helltower_Blue_Lose04",
+		"Announcer.Helltower_Blue_Lose05",
+		"Announcer.Helltower_Blue_Lose06",
+		"Announcer.Helltower_Blue_Lose07",
+		"Announcer.Helltower_Blue_Lose_Rare01",
+	};
+
 	if (!sm_halloween_round_sounds.BoolValue)
 		return Plugin_Continue;
 
@@ -370,14 +419,15 @@ Action Event_BroadcastAudio(Event event, const char[] sName, bool bDontBroadcast
 
 	TFTeam nTeam = view_as<TFTeam>(event.GetInt("team"));
 
+	int iRandom = GetURandomInt();
 	if (strcmp(sAudio, "Game.YourTeamWon") == 0)
 	{
-		event.SetString("sound", (nTeam == TFTeam_Red) ? "Announcer.Helltower_Hell_Red_Win" : "Announcer.Helltower_Hell_Blue_Win");
+		event.SetString("sound", (nTeam == TFTeam_Red) ? sRedWinSound[iRandom % sizeof(sRedWinSound)] : sBlueWinSound[iRandom % sizeof(sBlueWinSound)]);
 		return Plugin_Changed;
 	}
 	else if (strcmp(sAudio, "Game.YourTeamLost") == 0)
 	{
-		event.SetString("sound", (nTeam == TFTeam_Red) ? "Announcer.Helltower_Hell_Red_Lose" : "Announcer.Helltower_Hell_Blue_Lose");
+		event.SetString("sound", (nTeam == TFTeam_Red) ? sRedLoseSound[iRandom % sizeof(sRedLoseSound)] : sBlueLoseSound[iRandom % sizeof(sBlueLoseSound)]);
 		return Plugin_Changed;
 	}
 	else if (strcmp(sAudio, "Game.Stalemate") == 0)
