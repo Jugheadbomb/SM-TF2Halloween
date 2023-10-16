@@ -290,12 +290,6 @@ void Event_PostInventory(Event event, const char[] sName, bool bDontBroadcast)
 	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient))
 		return;
 
-	SetVariantString("randomnum:100");
-	AcceptEntityInput(iClient, "AddContext");
-
-	SetVariantString("IsUnicornHead:1");
-	AcceptEntityInput(iClient, "AddContext");
-
 	CreateTimer(0.3, Timer_GiveZombieSoul, GetClientUserId(iClient));
 
 	if (sm_halloween_weapon_spells.BoolValue)
