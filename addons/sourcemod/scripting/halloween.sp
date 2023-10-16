@@ -469,7 +469,7 @@ Action SoundHook(int iClients[MAXPLAYERS], int &iNumClients, char sSound[PLATFOR
 Action Timer_GiveZombieSoul(Handle hTimer, int iUserid)
 {
 	int iClient = GetClientOfUserId(iUserid);
-	if (!iClient)
+	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient))
 		return Plugin_Handled;
 
 	int iEnabled = sm_halloween_voodoo_souls.IntValue;
@@ -617,7 +617,7 @@ void Frame_ObjectiveSpawnPost(int iRef)
 void Frame_KillTomb(int iUserid)
 {
 	int iClient = GetClientOfUserId(iUserid);
-	if (!iClient || !IsPlayerAlive(iClient))
+	if (iClient <= 0 || iClient > MaxClients || !IsClientInGame(iClient) || !IsPlayerAlive(iClient))
 		return;
 
 	int iRagdoll = MaxClients + 1;
