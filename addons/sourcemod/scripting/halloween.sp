@@ -758,6 +758,8 @@ void SetCorrection(const char[] sFile)
 	DispatchKeyValue(iCorrection, "maxweight", "1.0");
 	DispatchKeyValue(iCorrection, "maxfalloff", "-1");
 	DispatchKeyValue(iCorrection, "minfalloff", "0.0");
+	DispatchKeyValue(iCorrection, "StartDisabled", "1");
+	DispatchKeyValue(iCorrection, "fadeInDuration", "5.0");
 	DispatchKeyValue(iCorrection, "filename", sFile);
 
 	DispatchSpawn(iCorrection);
