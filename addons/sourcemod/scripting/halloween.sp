@@ -74,6 +74,7 @@ ConVar sm_halloween_soundscapes;
 ConVar sm_halloween_skyboxes;
 ConVar sm_halloween_colorcorrection;
 ConVar sm_halloween_modelreplaces;
+ConVar sm_halloween_darkfog;
 
 int g_iTombRef[MAXPLAYERS];
 
@@ -100,6 +101,7 @@ public void OnPluginStart()
 	sm_halloween_skyboxes = CreateConVar("sm_halloween_skyboxes", "1", "Toggle halloween skyboxes replacement", _, true, 0.0, true, 1.0);
 	sm_halloween_colorcorrection = CreateConVar("sm_halloween_colorcorrection", "1", "Toggle night color correction", _, true, 0.0, true, 1.0);
 	sm_halloween_modelreplaces = CreateConVar("sm_halloween_modelreplaces", "1", "Toggle ammopack/resupply locker model replacements (works only when full moon or halloween)", _, true, 0.0, true, 1.0);
+	sm_halloween_darkfog = CreateConVar("sm_halloween_darkfog", "1", "Toggle darkening map fog (does not create fog if not exists)", _, true, 0.0, true, 1.0);
 
 	HookEvent("teamplay_round_start", Event_RoundStart, EventHookMode_PostNoCopy);
 	HookEvent("player_spawn", Event_PlayerState);
@@ -194,6 +196,10 @@ public void OnClientPutInServer(int iClient)
 {
 	AddHalloweenVision(iClient);
 
+	// Make 3D Skybox fog darker
+	if (sm_halloween_darkfog.BoolValue && !IsHalloweenMap())
+		CreateTimer(1.0, Timer_SetFog, GetClientUserId(iClient));
+	
 	if (sm_halloween_welcome_sounds.BoolValue)
 		EmitSoundToClient(iClient, g_sWelcomeSound[GetURandomInt() % sizeof(g_sWelcomeSound)], .volume = 0.7);
 }
@@ -266,6 +272,25 @@ void Event_RoundStart(Event event, const char[] sName, bool bDontBroadcast)
 
 		if (sm_halloween_colorcorrection.BoolValue)
 			SetCorrection(CORRECTION_FILE);
+
+		if (sm_halloween_darkfog.BoolValue && GameRules_GetProp("m_nRoundsPlayed") == 0)
+		{
+			int iFog = FindEntityByClassname(-1, "env_fog_controller");
+			if (iFog > MaxClients)
+			{
+				int iColor[4];
+
+				IntToRGB(GetEntProp(iFog, Prop_Send, "m_fog.colorPrimary"), iColor);
+				iColor[0] /= 3; iColor[1] /= 3; iColor[2] /= 3;
+				SetVariantColor(iColor);
+				AcceptEntityInput(iFog, "SetColor");
+
+				IntToRGB(GetEntProp(iFog, Prop_Send, "m_fog.colorSecondary"), iColor);
+				iColor[0] /= 3; iColor[1] /= 3; iColor[2] /= 3;
+				SetVariantColor(iColor);
+				AcceptEntityInput(iFog, "SetColorSecondary");
+			}
+		}
 	}
 }
 
@@ -485,6 +510,23 @@ Action Timer_GiveZombieSoul(Handle hTimer, int iUserid)
 	return Plugin_Handled;
 }
 
+Action Timer_SetFog(Handle hTimer, int iUserid)
+{
+	int iClient = GetClientOfUserId(iUserid);
+	if (iClient == 0)
+		return Plugin_Handled;
+
+	int iColor[4];
+	IntToRGB(GetEntProp(iClient, Prop_Send, "m_skybox3d.fog.colorPrimary"), iColor);
+	iColor[0] /= 3; iColor[1] /= 3; iColor[2] /= 3;
+	SetEntProp(iClient, Prop_Send, "m_skybox3d.fog.colorPrimary", RGBToInt(iColor));
+
+	IntToRGB(GetEntProp(iClient, Prop_Send, "m_skybox3d.fog.colorSecondary"), iColor);
+	iColor[0] /= 3; iColor[1] /= 3; iColor[2] /= 3;
+	SetEntProp(iClient, Prop_Send, "m_skybox3d.fog.colorSecondary", RGBToInt(iColor));
+	return Plugin_Handled;
+}
+
 bool GiveZombieSoul(int iClient)
 {
 	static const int iVoodoIndex[TFClassType] = { -1, 5617, 5625, 5618, 5620, 5622, 5619, 5624, 5623, 5621 };
@@ -534,7 +576,14 @@ void SetZombieViewmodel(int iClient, bool bState)
 
 		iWeapon = GetPlayerWeaponSlot(iClient, i);
 		if (iWeapon > MaxClients)
-			SetEntProp(iWeapon, Prop_Send, "m_nCustomViewmodelModelIndex", bState ? iModelIndex : 0);
+		{
+			int current = GetEntProp(iWeapon, Prop_Send, "m_nCustomViewmodelModelIndex");
+
+			if (bState)
+				SetEntProp(iWeapon, Prop_Send, "m_nCustomViewmodelModelIndex", iModelIndex);
+			else if (current > 0 && current == iModelIndex)
+				SetEntProp(iWeapon, Prop_Send, "m_nCustomViewmodelModelIndex", 0);
+		}
 	}
 }
 
@@ -807,4 +856,17 @@ bool IsHalloweenMap()
 {
 	TFHoliday nHoliday = view_as<TFHoliday>(GameRules_GetProp("m_nMapHolidayType"));
 	return (nHoliday == TFHoliday_Halloween);
+}
+
+void IntToRGB(int value, int iColor[4])
+{
+	iColor[0] = (value >> 16) & 0xFF;
+	iColor[1] = (value >> 8) & 0xFF;
+	iColor[2] = value & 0xFF;
+	iColor[3] = 255;
+}
+
+int RGBToInt(int iColor[4])
+{
+	return (iColor[0] << 16) | (iColor[1] << 8) | iColor[2];
 }
