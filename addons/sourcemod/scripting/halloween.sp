@@ -6,7 +6,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define PLUGIN_VERSION "1.0.2"
+#define PLUGIN_VERSION "1.0.3"
 
 #define EF_NODRAW (1 << 5)
 #define TF_VISION_FILTER_HALLOWEEN (1 << 1)
