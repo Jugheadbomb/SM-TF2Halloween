@@ -370,7 +370,11 @@ void Event_ItemPickup(Event event, const char[] sName, bool bDontBroadcast)
 		return;
 
 	if (sm_halloween_pickup_sounds.BoolValue)
-		EmitSoundToClient(iClient, g_sPickupSound[GetURandomInt() % sizeof(g_sPickupSound)], .volume = 0.6);
+	{
+		char sItem[32];
+		event.GetString("item", sItem, sizeof(sItem));
+		EmitSoundToClient(iClient, g_sPickupSound[view_as<int>(StrContains(sItem, "ammo") != -1)], .volume = 0.6);
+	}
 }
 
 Action Event_BroadcastAudio(Event event, const char[] sName, bool bDontBroadcast)
